@@ -122,6 +122,7 @@ def evaluate_board_state(board):
 def evaluate_move(board, move):
     # Make the move on a copy of the board
     board_copy = board.copy()
+    move = chess.Move.from_uci("e4")
     board_copy.push(move)  # Don't need to convert 'move' to UCI format
     
     # Evaluate the resulting board position using Stockfish
