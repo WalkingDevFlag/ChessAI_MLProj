@@ -1,8 +1,7 @@
 from ChessBoard import ChessBoard
 from HumanMove import playHumanMove
 from CheckGame import check_game_end, resolve_check
-from AIEngine import Engine
-from Chess_Rep import get_board_array, create_rep_layer, move_and_board_to_rep, create_movelist, move_to_string, append_to_csv, evaluate_board_state, evaluate_move
+from Chess_Rep import create_rep_layer, move_and_board_to_rep, create_movelist, move_to_string, append_to_csv, evaluate_board_state, board_to_3d_matrix, save_variable
 from AIEngine_1 import Engine as AIEngine_1
 from AIEngine_2 import Engine as AIEngine_2
 from ExitGame import exit_game
@@ -11,45 +10,13 @@ import numpy as np
 import sys
 
 
-def check_only_two_kings(board):
-    if len(board.piece_map().values()) == 2 and all(piece.piece_type == chess.KING for piece in board.piece_map().values()):
-        return True
-    else:
-        return False
-    
-def evaluate_move_material(board, move):
-    # Make a copy of the board
-    board_copy = board.copy()
-    
-    # Apply the move to the board copy
-    board_copy.push(move)
-    
-    # Evaluate the material balance after the move
-    material_after_move = sum(piece_value(piece) for piece in board_copy.piece_map().values())
-    material_before_move = sum(piece_value(piece) for piece in board.piece_map().values())
-    material_difference = material_after_move - material_before_move
-    
-    return material_difference
 
-def piece_value(piece):
-    # Assign numerical values to pieces
-    values = {'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9}
-    piece_symbol = piece.symbol().upper()
-    return values.get(piece_symbol, 0)  # Return 0 for unrecognized pieces (e.g., kings)
-
-
-
-    
 def main():
     print("Welcome to Chess Game!")
     print("Would you like to watch AI self-play? (Self-play)")
     game_mode = input("Enter your choice: ").lower()
     
-    # Create a chessboard instance
     game = ChessBoard()
-
-    # Initialize move list
-    move_list = ""
 
     if game_mode == "self-play":
         print("You have chosen to watch AI self-play.")
@@ -60,14 +27,10 @@ def main():
 
         # Print the initial chessboard
         game.print_board()
-        
-        # Game loop i.e Start self-play
+
+        move_list = ""
+
         while True:
-            # Check if there are only two kings left on the board
-            if check_only_two_kings(game.board):
-                print("Only two kings left on the board. Exiting the program.")
-                sys.exit()
-                
             # White engine (AIEngine_1) makes a move
             print("The White AI is thinking...")
             white_engine = AIEngine_1(game.board, ai_difficulty, chess.WHITE)
@@ -80,18 +43,26 @@ def main():
             if result:
                 if "Checkmate" in result:
                     print(result)
-                    break  # Break if it's a checkmate
+                    break 
                 elif "Check" in result:
                     print(result)
                     print("Make a move to get out of check")
                 continue
 
-            # Board Evaluation:
-            board_evaluation = evaluate_board_state(game.board)
-            print("Board Evaluation after Whites's move:", board_evaluation)
-            # Move Evaluation:
-            move_evaluation = evaluate_move_material(game.board, best_move)
-            print("Evaluation after playing move", best_move, ":", move_evaluation)
+            move_rep = move_and_board_to_rep(best_move, game.board)
+            move_list += str(best_move) + " "
+            a = board_to_3d_matrix(game.board)
+            b = create_rep_layer(game.board)
+            c = move_rep
+            d = create_movelist(move_list)
+            e = evaluate_board_state(game.board)
+
+            save_variable(a, 'w_board_matrix.npz')
+            save_variable(b, 'w_board_representation.npz')
+            save_variable(c, 'w_move_rep.npz')
+            save_variable(d, 'w_move_list.npz')
+            save_variable(e, 'w_board_evaluation.npz')
+
 
             
             # Black engine (AIEngine_2) makes a move
@@ -106,19 +77,25 @@ def main():
             if result:
                 if "Checkmate" in result:
                     print(result)
-                    break  # Break if it's a checkmate
+                    break  
                 elif "Check" in result:
                     print(result)
                     print("Make a move to get out of check")
                 continue
-            
-            # Board Evaluation:
-            board_evaluation = evaluate_board_state(game.board)
-            print("Board Evaluation after Black's move:", board_evaluation)
-            # Move Evaluation:
-            move_evaluation = evaluate_move_material(game.board, best_move)
-            print("Evaluation after playing move", best_move, ":", move_evaluation)
 
+            move_rep = move_and_board_to_rep(best_move, game.board)
+            move_list += str(best_move) + " "
+            v = board_to_3d_matrix(game.board)
+            w = create_rep_layer(game.board)
+            x = move_rep
+            y = create_movelist(move_list)
+            z = evaluate_board_state(game.board)
+
+            save_variable(a, 'b_board_matrix.npz')
+            save_variable(b, 'b_board_representation.npz')
+            save_variable(c, 'b_move_rep.npz')
+            save_variable(d, 'b_move_list.npz')
+            save_variable(e, 'b_board_evaluation.npz')
 
 
     else:
@@ -126,3 +103,114 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+    
+'''piece_values = {
+    chess.PAWN: 1,
+    chess.KNIGHT: 3,
+    chess.BISHOP: 3,
+    chess.ROOK: 5,
+    chess.QUEEN: 9
+}
+
+# Piece-square tables (PST) for evaluation
+pst_values = {
+    chess.PAWN: [
+        [ 0,  0,  0,  0,  0,  0,  0,  0],
+        [50, 50, 50, 50, 50, 50, 50, 50],
+        [10, 10, 20, 30, 30, 20, 10, 10],
+        [ 5,  5, 10, 25, 25, 10,  5,  5],
+        [ 0,  0,  0, 20, 20,  0,  0,  0],
+        [ 5, -5,-10,  0,  0,-10, -5,  5],
+        [ 5, 10, 10,-20,-20, 10, 10,  5],
+        [ 0,  0,  0,  0,  0,  0,  0,  0]
+    ],
+    chess.KNIGHT: [
+        [-50,-40,-30,-30,-30,-30,-40,-50],
+        [-40,-20,  0,  0,  0,  0,-20,-40],
+        [-30,  0, 10, 15, 15, 10,  0,-30],
+        [-30,  5, 15, 20, 20, 15,  5,-30],
+        [-30,  0, 15, 20, 20, 15,  0,-30],
+        [-30,  5, 10, 15, 15, 10,  5,-30],
+        [-40,-20,  0,  5,  5,  0,-20,-40],
+        [-50,-40,-30,-30,-30,-30,-40,-50],
+    ],
+    chess.BISHOP: [
+        [-20,-10,-10,-10,-10,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5, 10, 10,  5,  0,-10],
+        [-10,  5,  5, 10, 10,  5,  5,-10],
+        [-10,  0, 10, 10, 10, 10,  0,-10],
+        [-10, 10, 10, 10, 10, 10, 10,-10],
+        [-10,  5,  0,  0,  0,  0,  5,-10],
+        [-20,-10,-10,-10,-10,-10,-10,-20],
+    ],
+    chess.ROOK: [
+        [ 0,  0,  0,  0,  0,  0,  0,  0],
+        [ 5, 10, 10, 10, 10, 10, 10,  5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [ 0,  0,  0,  5,  5,  0,  0,  0]
+],
+    chess.QUEEN: [
+        [-20,-10,-10, -5, -5,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5,  5,  5,  5,  0,-10],
+        [ -5,  0,  5,  5,  5,  5,  0, -5],
+        [  0,  0,  5,  5,  5,  5,  0, -5],
+        [-10,  5,  5,  5,  5,  5,  0,-10],
+        [-10,  0,  5,  0,  0,  0,  0,-10],
+        [-20,-10,-10, -5, -5,-10,-10,-20],
+]
+}
+
+# Evaluate pawn structure
+def evaluate_pawn_structure(board):
+    # Sample implementation: count the number of pawn islands
+    pawn_islands = 0
+    for file in range(8):
+        for rank in range(7):
+            if board.piece_at(chess.square(file, rank)) == chess.PAWN:
+                # Check if the pawn has no pawns adjacent to it
+                if not any(board.piece_at(sq) == chess.PAWN for sq in chess.SquareSet(chess.square(file, rank)).neighbors()):
+                    pawn_islands += 1
+    return -pawn_islands  # Negative score for pawn islands
+
+# Evaluate king safety
+def evaluate_king_safety(board):
+    # Sample implementation: count the number of attackers near the king
+    king_square = board.king(chess.WHITE)  # Assuming white king
+    attackers = len(board.attackers(chess.BLACK, king_square))
+    return -attackers  # Negative score for more attackers near the king
+
+# Evaluate a move score
+def evaluate_move_score(board, move):
+    evaluation = 0
+    
+    # Make the move on a copy of the board
+    board_copy = board.copy()
+    board_copy.push(move)
+    
+    # Material evaluation
+    for square in chess.SQUARES:
+        piece = board_copy.piece_at(square)
+        if piece:
+            piece_value = piece_values[piece.piece_type]
+            evaluation += piece_value
+            
+            # Add piece-square table value
+            pst_value = pst_values[piece.piece_type - 1][square]
+            evaluation += pst_value
+    
+    # Evaluate pawn structure
+    evaluation += evaluate_pawn_structure(board_copy)
+    
+    # Evaluate king safety
+    evaluation += evaluate_king_safety(board_copy)
+    
+    return evaluation'''
