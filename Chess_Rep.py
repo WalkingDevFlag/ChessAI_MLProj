@@ -5,6 +5,17 @@ import chess.engine
 import pandas as pd
 import csv
 
+
+def save_variable(variable, filename):
+    if isinstance(variable, np.ndarray):
+        np.savez(filename, data=variable)
+    elif isinstance(variable, list):
+        np.savez(filename, data=np.array(variable))
+    elif isinstance(variable, dict):
+        np.savez(filename, **variable)
+    else:
+        np.savez(filename, data=np.array([variable]))
+
 def append_to_csv(file_path, data):
     # Check if the file exists
     try:
@@ -28,7 +39,7 @@ def append_to_csv(file_path, data):
             writer.writerow(data)
 
 
-def get_board_array(board):
+'''def get_board_array(board):
     board_array = np.zeros((8, 8, 17))  # Initialize a 3D array to represent the board
     pieces = board.piece_map()  # Get the pieces on the board
 
@@ -42,6 +53,47 @@ def get_board_array(board):
         board_array[rank][file][piece_value] = 1 if piece_color else -1  # Set the piece value at the position
 
     return board_array
+'''
+
+
+'''def board_to_array(board):
+    board_array = np.zeros((1, 8, 8, 17))
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece is not None:
+            piece_index = piece.piece_type - 1
+            if piece.color == chess.WHITE:
+                piece_value = 1
+            else:
+                piece_value = -1
+            rank = chess.square_rank(square)
+            file = chess.square_file(square)
+            board_array[0][rank][file][piece_index] = piece_value
+    
+    return board_array
+'''
+
+def board_to_3d_matrix(board):
+    board_matrix = np.zeros((14, 8, 8))
+    piece_to_channel = {'p': 0, 'r': 1, 'n': 2, 'b': 3, 'q': 4, 'k': 5,
+                        'P': 6, 'R': 7, 'N': 8, 'B': 9, 'Q': 10, 'K': 11}
+    for row in range(8):
+        for col in range(8):
+            square = chess.square(col, 7 - row)  
+            piece = board.piece_at(square)
+            if piece is not None:
+                piece_channel = piece_to_channel[piece.symbol()]
+                board_matrix[piece_channel, row, col] = 1
+
+    # Channel 12: 1 if it's white's turn, 0 if it's black's turn
+    board_matrix[12] = 1 if board.turn == chess.WHITE else 0
+    # Channel 13: 1 if white can kingside castle, 0 otherwise
+    board_matrix[13, 0 if board.turn == chess.WHITE else 7, 7] = 1 if board.castling_rights & chess.BB_H1 != 0 else 0
+    # Channel 14: 1 if white can queenside castle, 0 otherwise
+    board_matrix[13, 0 if board.turn == chess.WHITE else 7, 0] = 1 if board.castling_rights & chess.BB_A1 != 0 else 0
+
+    return board_matrix
+
 
 
 def create_rep_layer(board):
@@ -119,14 +171,14 @@ def evaluate_board_state(board):
     return evaluation_score
 
 
-def evaluate_move(board, move):
+'''def evaluate_move(board, move):
     # Make the move on a copy of the board
-    board_copy = board.copy()
-    move = chess.Move.from_uci("e4")
+    board_copy = (board.pop()).copy()
+    
     board_copy.push(move)  # Don't need to convert 'move' to UCI format
     
     # Evaluate the resulting board position using Stockfish
-    return evaluate_board_state(board_copy)
+    return evaluate_board_state(board_copy)'''
 
 
 '''class ChessDataset(Dataset):
