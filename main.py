@@ -2,7 +2,7 @@ from ChessBoard import ChessBoard
 from HumanMove import playHumanMove
 from CheckGame import check_game_end, resolve_check
 from AIEngine import Engine
-from Chess_Rep import get_board_array, create_rep_layer, move_and_board_to_rep, create_movelist, move_to_string, append_to_csv, evaluate_board_state, evaluate_move
+from Chess_Rep import board_to_3d_matrix, create_rep_layer, move_and_board_to_rep, create_movelist, move_to_string, append_to_csv, evaluate_board_state
 from AIEngine_1 import Engine as AIEngine_1
 from AIEngine_2 import Engine as AIEngine_2
 from ExitGame import exit_game
@@ -25,12 +25,9 @@ def main():
     
     # Create a chessboard instance
     game = ChessBoard()
-
-    # Initialize move list
     move_list = ""
 
     if game_mode == "ai":
-        # Play against AI
         print("You have chosen to play against the AI.")
         ai_difficulty = int(input("Choose AI difficulty level (1-5): "))
         if ai_difficulty < 1 or ai_difficulty > 5:
@@ -40,9 +37,7 @@ def main():
         # Print the initial chessboard
         game.print_board()
 
-        # Game loop
         while True:
-
             # Check if there are only two kings left on the board
             if len(game.board.pieces(chess.KING)) == 2:
                 print("Only two kings left on the board. Exiting the program.")
@@ -50,30 +45,28 @@ def main():
                 
             # Player (Human) makes a move
             print("Your move:")
-            human_move = playHumanMove(game.board)  # Store the move made by the human
+            human_move = playHumanMove(game.board)  
             if human_move:
-                exit_game()  # Call exit_game function if playHumanMove returns True
+                exit_game()  
             game.print_board()
             result = check_game_end(game.board)
             if result:
                 if "Checkmate" in result:
                     print(result)
-                    break  # Break if it's a checkmate
+                    break  
                 continue
 
             move_rep = move_and_board_to_rep(human_move, game.board)
             move_list += str(human_move) + " "
-            #Print Representations:
-            print("Board array representation:\n", get_board_array(game.board), "\n")
-            
-            print("Representation layer:\n", create_rep_layer(game.board), "\n")
-            
-            move_rep = move_and_board_to_rep(human_move, game.board)
-            print("Move Representation:\n", move_rep)
-            
-            # Append the move to the move list and print
-            move_list += str(human_move) + " "
-            print("Move list:\n", create_movelist(move_list), "\n")
+            d = create_movelist(move_list)
+            b = create_rep_layer(game.board)
+            a = board_to_3d_matrix(game.board)
+            c = move_rep
+            e = evaluate_board_state(game.board)
+
+            data_to_append=(a,b,c,d,e)
+            file_path='C:\\Users\\Lenovo\\Desktop\\Chess AI\\WhiteDataset.csv' #xlsx
+            append_to_csv(file_path, data_to_append)
 
             
             # AI makes a move
@@ -88,23 +81,23 @@ def main():
             if result:
                 if "Checkmate" in result:
                     print(result)
-                    break  # Break if it's a checkmate
+                    break  
                 elif "Check" in result:
                     print(result)
                     print("Make a move to get out of check")
                 continue
 
-            #Print Representations:
-            print("Board array representation:\n", get_board_array(game.board), "\n")
-            
-            print("Representation layer:\n", create_rep_layer(game.board), "\n")
-            
             move_rep = move_and_board_to_rep(best_move, game.board)
-            print("Move Representation:\n", move_rep)
-            
-            # Append the move to the move list and print
             move_list += str(best_move) + " "
-            print("Move list:\n", create_movelist(move_list), "\n")
+            d = create_movelist(move_list)
+            b = create_rep_layer(game.board)
+            a = board_to_3d_matrix(game.board)
+            c = move_rep
+            e = evaluate_board_state(game.board)
+
+            data_to_append=(a,b,c,d,e)
+            file_path='C:\\Users\\Lenovo\\Desktop\\Chess AI\\WhiteDataset.csv' #xlsx
+            append_to_csv(file_path, data_to_append)
 
 
     elif game_mode == "self-play":
@@ -114,12 +107,8 @@ def main():
             print("Invalid difficulty level. Defaulting to level 3.")
             ai_difficulty = 3
 
-        # Print the initial chessboard
         game.print_board()
-        
-        # Game loop i.e Start self-play
         while True:
-            # Check if there are only two kings left on the board
             if check_only_two_kings(game.board):
                 print("Only two kings left on the board. Exiting the program.")
                 sys.exit()
@@ -136,7 +125,7 @@ def main():
             if result:
                 if "Checkmate" in result:
                     print(result)
-                    break  # Break if it's a checkmate
+                    break  
                 elif "Check" in result:
                     print(result)
                     print("Make a move to get out of check")
@@ -144,23 +133,13 @@ def main():
 
             move_rep = move_and_board_to_rep(best_move, game.board)
             move_list += str(best_move) + " "
-            d=create_movelist(move_list)
-            b=create_rep_layer(game.board)
-            a=get_board_array(game.board)
-            c=move_rep
-            '''#Print Representations:
-            print("Board array representation:\n", get_board_array(game.board), "\n")
-            
-            print("Representation layer:\n", create_rep_layer(game.board), "\n")
-            
-            move_rep = move_and_board_to_rep(best_move, game.board)
-            print("Move Representation:\n", move_rep)
-            
-            # Append the move to the move list and print
-            move_list += str(best_move) + " "
-            print("Move list:\n", create_movelist(move_list), "\n")'''
+            d = create_movelist(move_list)
+            b = create_rep_layer(game.board)
+            a = board_to_3d_matrix(game.board)
+            c = move_rep
+            e = evaluate_board_state(game.board)
 
-            data_to_append=(a,b,c,d)
+            data_to_append=(a,b,c,d,e)
             file_path='C:\\Users\\Lenovo\\Desktop\\Chess AI\\WhiteDataset.csv' #xlsx
             append_to_csv(file_path, data_to_append)
             
@@ -178,7 +157,7 @@ def main():
             if result:
                 if "Checkmate" in result:
                     print(result)
-                    break  # Break if it's a checkmate
+                    break  
                 elif "Check" in result:
                     print(result)
                     print("Make a move to get out of check")
@@ -186,23 +165,14 @@ def main():
 
             move_rep = move_and_board_to_rep(best_move, game.board)
             move_list += str(best_move) + " "
-            z=create_movelist(move_list)
-            w=create_rep_layer(game.board)
-            v=get_board_array(game.board)
-            y=move_rep
-            '''#Print Representations:
-            print("Board array representation:\n", get_board_array(game.board), "\n")
-            
-            print("Representation layer:\n", create_rep_layer(game.board), "\n")
-            
-            move_rep = move_and_board_to_rep(best_move, game.board)
-            print("Move Representation:\n", move_rep)
-            
-            # Append the move to the move list and print
-            move_list += str(best_move) + " "
-            print("Move list:\n", create_movelist(move_list), "\n")'''
+            z = create_movelist(move_list)
+            w = create_rep_layer(game.board)
+            v = board_to_3d_matrix(game.board)
+            y = move_rep
+            u = evaluate_board_state(game.board)
 
-            data_to_append=(v,w,y,z)
+
+            data_to_append=(v,w,y,z,u)
             file_path='C:\\Users\\Lenovo\\Desktop\\Chess AI\\BlackDataset.csv' #xlsx
             append_to_csv(file_path, data_to_append)
 
