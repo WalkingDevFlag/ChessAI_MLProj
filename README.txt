@@ -17,3 +17,6 @@ Edit 2:
 2. Now able to represent the board in arrays and amtrices
 3. Added a randomized function for opening
 
+Edit 3:
+1. Gonna Pick up the fucking board GUI from the below link: "https://github.com/AlejoG10/python-chess-ai-yt/blob/master/src/dragger.py"
+2. Will Update the Repositary after playing Valorant and F1
