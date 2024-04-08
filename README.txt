@@ -20,3 +20,8 @@ Edit 2:
 Edit 3:
 1. Gonna Pick up the board GUI from the below link: "https://github.com/AlejoG10/python-chess-ai-yt/blob/master/src/dragger.py"
 2. Will Update the Repositary after playing Valorant and F1
+
+Edit 4:
+1. Built a separate GUI folder on pygame for chess
+2. Will integrate AIEngine in the GUI folder after some time
+3. 'Original Chess' and 'Self Play' are for IDLE or on the output terminal whereas 'GUI' creates a separate popup
