@@ -25,3 +25,6 @@ Edit 4:
 1. Built a separate GUI folder on pygame for chess
 2. Will integrate AIEngine in the GUI folder after some time
 3. 'Original Chess' and 'Self Play' are for IDLE or on the output terminal whereas 'GUI' creates a separate popup
+
+Edit 5:
+1. Stockfish Linux Version for evaluation (Collab) or windows for local
