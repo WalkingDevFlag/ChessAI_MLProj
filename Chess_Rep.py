@@ -4,9 +4,9 @@ import re
 import chess.engine
 import pandas as pd
 import csv
+import os
 
-
-def save_variable(variable, filename):
+'''def save_variable(variable, filename):
     if isinstance(variable, np.ndarray):
         np.savez(filename, data=variable)
     elif isinstance(variable, list):
@@ -15,6 +15,40 @@ def save_variable(variable, filename):
         np.savez(filename, **variable)
     else:
         np.savez(filename, data=np.array([variable]))
+'''
+
+def save_variable(variable, filename):
+    if isinstance(variable, np.ndarray):
+        if os.path.isfile(filename + ".npz"):
+            with np.load(filename + ".npz") as existing_data:
+                merged_data = {**existing_data, "data": variable}
+                np.savez(filename, **merged_data)
+        else:
+            np.savez(filename, data=variable)
+    elif isinstance(variable, list):
+        if os.path.isfile(filename + ".npz"):
+            with np.load(filename + ".npz") as existing_data:
+                existing_list = existing_data["data"]
+                merged_list = existing_list + variable
+                np.savez(filename, data=np.array(merged_list))
+        else:
+            np.savez(filename, data=np.array(variable))
+    elif isinstance(variable, dict):
+        if os.path.isfile(filename + ".npz"):
+            with np.load(filename + ".npz") as existing_data:
+                merged_data = {**existing_data, **variable}
+                np.savez(filename, **merged_data)
+        else:
+            np.savez(filename, **variable)
+    else:
+        if os.path.isfile(filename + ".npz"):
+            with np.load(filename + ".npz") as existing_data:
+                existing_variable = existing_data["data"]
+                merged_variable = np.concatenate((existing_variable, np.array([variable])))
+                np.savez(filename, data=merged_variable)
+        else:
+            np.savez(filename, data=np.array([variable]))
+            
 
 def append_to_csv(file_path, data):
     # Check if the file exists
@@ -83,7 +117,10 @@ def board_to_3d_matrix(board):
             piece = board.piece_at(square)
             if piece is not None:
                 piece_channel = piece_to_channel[piece.symbol()]
-                board_matrix[piece_channel, row, col] = 1
+                if piece.color == chess.WHITE:
+                    board_matrix[piece_channel, row, col] = 1
+                else:
+                    board_matrix[piece_channel + 6, row, col] = 1
 
     # Channel 12: 1 if it's white's turn, 0 if it's black's turn
     board_matrix[12] = 1 if board.turn == chess.WHITE else 0
