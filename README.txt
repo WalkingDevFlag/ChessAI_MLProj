@@ -28,3 +28,7 @@ Edit 4:
 
 Edit 5:
 1. Stockfish Linux Version for evaluation (Collab) or windows for local
+
+Edit 6:
+1. Basic RL model structure built
+2. Future work will be refining the parameters and cleaning the code for better functionality
