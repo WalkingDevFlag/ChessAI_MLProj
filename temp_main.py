@@ -10,6 +10,8 @@ import numpy as np
 import sys
 
 
+
+
 def save_board_states(board_states_list, filename):
     board_states_array = np.stack(board_states_list, axis=0)
     np.savez(filename, data=board_states_array)
