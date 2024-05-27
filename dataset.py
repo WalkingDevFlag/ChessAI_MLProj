@@ -2,6 +2,8 @@ import numpy as np
 import chess
 import tensorflow as tf 
 
+
+
 '''
 1. Implements a custom dataset class (ChessDataset) for generating training data.
 
