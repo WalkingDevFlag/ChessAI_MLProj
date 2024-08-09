@@ -3,7 +3,6 @@ The folder "Original_Chess" has the base code for the user to be able to play wi
 The chess engine or AIEngine is based on the minimax alpha-beta pruning algorithm to make decisions and make moves.
 
 
-
 The main.py is the main module to be run.
 
 The modules "alpha_zero_chess_model", "chess_ai_training", "IDK" and "Main_Training_Loop" are coded on a trial basis for the neural architecture and are not to be included right now....
