@@ -59,3 +59,5 @@ This repository contains components for a chess-related project. It is structure
 ## License
 This project is licensed under the MIT License.
 
+## Update
+To Be Honest I feel like cloning this repo and running everything again just to you know clean it up and add requirements.txt and all to make it look professional
